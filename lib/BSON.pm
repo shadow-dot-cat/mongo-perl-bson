@@ -113,9 +113,8 @@ has invalid_chars => (
 
 =attr max_length
 
-This attribute defines the maximum document size. The default is 16MiB, which
-disables is the maximum BSON document size as specified in
-L<"MongoDB Limits and Thresholds"|https://docs.mongodb.com/manual/reference/limits/>
+This attribute defines the maximum document size. The default is 0, which
+disables any maximum.
 
 If set to a positive number, it applies to both encoding B<and> decoding (the
 latter is necessary for prevention of resource consumption attacks).
@@ -124,7 +123,6 @@ latter is necessary for prevention of resource consumption attacks).
 
 has max_length => (
     is      => 'ro',
-    default => 16_777_216, # 16MiB
     isa     => sub { die "not a non-negative number" unless defined $_[0] && $_[0] >= 0 },
 );
 
