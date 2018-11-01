@@ -62,6 +62,7 @@ use constant {
     BSON_OBJECTID => 'a12',
     BSON_BINARY_TYPE => 'C',
     BSON_CSTRING => 'Z*',
+    BSON_MAX_DEPTH => 100,
 };
 
 sub _printable {
@@ -178,6 +179,8 @@ sub _reftype_check {
     return;
 }
 
+my $count = 0;
+
 sub _encode_bson {
     my ($doc, $opt) = @_;
 
@@ -213,6 +216,10 @@ sub _encode_bson {
     my ($key, $value);
     while ( $first_key_pending or ( $key, $value ) = $iter->() ) {
         next if defined $first_key && $key eq $first_key;
+
+        $count++;
+        croak "Exceeded max object depth of 100 with $count levels"
+            if $count > BSON_MAX_DEPTH;
 
         if ( $first_key_pending ) {
             $first_key = $key = delete $opt->{first_key};
