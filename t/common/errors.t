@@ -55,8 +55,9 @@ use BSON::Types ':all';
 
 {
     my %hundred_hash;
-    create_nest(\%hundred_hash,60);
+    create_nest(\%hundred_hash,20000);
     eval { encode( \%hundred_hash ) };
+    ::Dwarn \%hundred_hash;
     my $err = $@ || "Unknown Error";
     if ( index($err, "circular reference detected at") != -1 ) {
         like( $@,
@@ -65,7 +66,7 @@ use BSON::Types ':all';
         );
     } else {
         like( $@,
-            qr/Exceeded max object depth of 100/,
+            qr/Exceeded max object depth of/,
             "Hit the specified max depth of documents in BSON_MAX_DEPTH"
         ) or diag($@);
     }
