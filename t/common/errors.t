@@ -55,20 +55,19 @@ use BSON::Types ':all';
 
 {
     my %hundred_hash;
-    create_nest(\%hundred_hash,20000);
+    create_nest(\%hundred_hash,100);
     eval { encode( \%hundred_hash ) };
-    ::Dwarn \%hundred_hash;
     my $err = $@ || "Unknown Error";
     if ( index($err, "circular reference detected at") != -1 ) {
-        like( $@,
+        like( $err,
             qr/circular reference detected at/,
             "Perl has a hard limit of 100 levels of recursion with warnings"
         );
     } else {
-        like( $@,
+        like( $err,
             qr/Exceeded max object depth of/,
             "Hit the specified max depth of documents in BSON_MAX_DEPTH"
-        ) or diag($@);
+        ) or diag($err);
     }
 }
 

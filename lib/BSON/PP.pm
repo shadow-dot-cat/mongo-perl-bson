@@ -218,7 +218,7 @@ sub _encode_bson {
         next if defined $first_key && $key eq $first_key;
 
         $count++;
-        croak "Exceeded max object depth of 100 with $count levels"
+        croak "Exceeded max object depth of ".BSON_MAX_DEPTH." with $count levels"
             if $count > BSON_MAX_DEPTH;
 
         if ( $first_key_pending ) {
