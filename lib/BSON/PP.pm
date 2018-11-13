@@ -179,13 +179,13 @@ sub _reftype_check {
     return;
 }
 
-my $count = 0;
-
 sub _encode_bson {
     my ($doc, $opt) = @_;
 
     my $refaddr = refaddr($doc);
     die "circular reference detected" if $opt->{_circular}{$refaddr}++;
+
+    $opt->{_depth} = 0 unless defined $opt->{_depth};
 
     my $doc_type = ref($doc);
 
@@ -217,9 +217,8 @@ sub _encode_bson {
     while ( $first_key_pending or ( $key, $value ) = $iter->() ) {
         next if defined $first_key && $key eq $first_key;
 
-        $count++;
-        croak "Exceeded max object depth of ".BSON_MAX_DEPTH." with $count levels"
-            if $count > BSON_MAX_DEPTH;
+        $opt->{_depth}++;
+        croak "Exceeded max object depth of ". BSON_MAX_DEPTH if $opt->{_depth} > BSON_MAX_DEPTH;
 
         if ( $first_key_pending ) {
             $first_key = $key = delete $opt->{first_key};
@@ -564,8 +563,11 @@ sub _decode_bson {
     my @array = ();
     my %hash = ();
     tie( %hash, 'Tie::IxHash' ) if $opt->{ordered};
+    $opt->{_depth} = 0 unless defined $opt->{_depth};
     my ($type, $key, $value);
     while ($bson) {
+        $opt->{_depth}++;
+        croak "Exceeded max object depth of ". BSON_MAX_DEPTH if $opt->{_depth} > BSON_MAX_DEPTH;
         ( $type, $key, $bson ) = unpack( BSON_TYPE_NAME.BSON_REMAINING, $bson );
         utf8::decode($key);
 
